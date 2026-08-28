@@ -7,6 +7,8 @@ export interface ActivityDocument extends Document {
   userId: string;
   userName: string;
   details: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const activitySchema = new Schema<ActivityDocument>(
