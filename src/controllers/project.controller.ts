@@ -13,6 +13,16 @@ export class ProjectController {
     res.json({ success: true, data: result.projects, pagination: { page: result.page, limit: parseInt(limit as string) || 20, total: result.total, pages: result.pages } });
   }
 
+  async search(req: Request, res: Response): Promise<void> {
+    const { q } = req.query;
+    if (!q || typeof q !== 'string' || q.trim().length === 0) {
+      res.json({ success: true, data: [] });
+      return;
+    }
+    const results = await projectService.search(q.trim());
+    res.json({ success: true, data: results });
+  }
+
   async findById(req: Request, res: Response): Promise<void> {
     const project = await projectService.findById(req.params.id);
     if (!project) { res.status(404).json({ success: false, message: 'Project not found' }); return; }
