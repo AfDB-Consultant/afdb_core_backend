@@ -1,0 +1,42 @@
+// MongoDB Playground for AfDB Core Backend
+// Requires: MongoDB for VS Code extension
+// Connection: mongodb+srv://atradezonecloud_db_user:***@afdbcluster.1m7peek.mongodb.net/
+
+// Switch to the afdb_core database
+use('afdb_core');
+
+// ─── List all collections ───
+db.getCollectionNames();
+
+// ─── View all projects ───
+db.projects.find({});
+
+// ─── Count projects by status ───
+db.projects.aggregate([
+  { $group: { _id: "$status", count: { $sum: 1 } } },
+  { $sort: { count: -1 } }
+]);
+
+// ─── View all team members ───
+db.teammembers.find({});
+
+// ─── View all activities ───
+db.activities.find({}).sort({ createdAt: -1 }).limit(20);
+
+// ─── Count documents per collection ───
+[
+  { collection: "projects", count: db.projects.countDocuments() },
+  { collection: "teammembers", count: db.teammembers.countDocuments() },
+  { collection: "activities", count: db.activities.countDocuments() }
+];
+
+// ─── View recent projects ───
+db.projects.find({}, { title: 1, status: 1, createdAt: 1 })
+  .sort({ createdAt: -1 })
+  .limit(10);
+
+// ─── View team members by role ───
+db.teammembers.aggregate([
+  { $group: { _id: "$role", count: { $sum: 1 } } },
+  { $sort: { count: -1 } }
+]);
