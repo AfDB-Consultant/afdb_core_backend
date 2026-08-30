@@ -29,6 +29,19 @@ export class ProjectService {
     return result;
   }
 
+  async search(query: string): Promise<ProjectDocument[]> {
+    const searchRegex = new RegExp(query, 'i');
+    return Project.find({
+      $or: [
+        { name: searchRegex },
+        { code: searchRegex },
+        { country: searchRegex },
+        { sector: searchRegex },
+        { manager: searchRegex },
+      ],
+    }).limit(10).sort({ createdAt: -1 });
+  }
+
   async findById(id: string): Promise<ProjectDocument | null> {
     return Project.findById(id);
   }
