@@ -478,6 +478,60 @@ async function seed() {
     const teamResult = await teamCol.insertMany(teamMembers);
     console.log(`Seeded ${teamResult.insertedCount} team members successfully\n`);
 
+    // ── Clear & seed activity events ──
+    const actCol = db.collection('activities');
+    const actCount = await actCol.countDocuments();
+    if (actCount > 0) { await actCol.deleteMany({}); console.log(`🗑️  Cleared ${actCount} existing activities`); }
+
+    const now = Date.now();
+    const h = 3600000; // 1 hour in ms
+    const ips = ['192.168.1.10', '192.168.1.25', '10.0.0.45', '172.16.0.88', '192.168.1.74', '10.0.0.12'];
+    const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15';
+    const ids = teamResult.insertedIds;
+
+    const activityEvents = [
+      // Last 24h — logins, MFA, token refreshes
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 1*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 1*h + 5000) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[1]), userName: 'Fatima Hassan', userEmail: 'fatima.hassan@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 2*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[1]), userName: 'Fatima Hassan', userEmail: 'fatima.hassan@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 2*h + 4000) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[2]), userName: 'Kwame Asante', userEmail: 'kwame.asante@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 3*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[2]), userName: 'Kwame Asante', userEmail: 'kwame.asante@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 3*h + 3000) },
+      { action: 'auth.login_failed', entityType: 'auth', userId: String(ids[3]), userName: 'Lina Benali', userEmail: 'lina.benali@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'warning', source: 'beta', status: 'failure', createdAt: new Date(now - 4*h), details: { reason: 'Invalid password' } },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[3]), userName: 'Lina Benali', userEmail: 'lina.benali@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 4*h + 60000) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[3]), userName: 'Lina Benali', userEmail: 'lina.benali@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 4*h + 65000) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[4]), userName: 'Jean-Pierre Mbuyi', userEmail: 'jp.mbuyi@afdb.org', ipAddress: ips[4], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 5*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[4]), userName: 'Jean-Pierre Mbuyi', userEmail: 'jp.mbuyi@afdb.org', ipAddress: ips[4], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 5*h + 3500) },
+      { action: 'auth.token_refresh', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 6*h) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[5]), userName: 'Grace Akello', userEmail: 'grace.akello@afdb.org', ipAddress: ips[5], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 7*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[5]), userName: 'Grace Akello', userEmail: 'grace.akello@afdb.org', ipAddress: ips[5], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 7*h + 4000) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[6]), userName: 'Yasmine Ben Salah', userEmail: 'yasmine.bensalah@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 9*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[6]), userName: 'Yasmine Ben Salah', userEmail: 'yasmine.bensalah@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 9*h + 3000) },
+      { action: 'auth.login_failed', entityType: 'auth', userId: String(ids[9]), userName: 'Olusegun Obasanjo', userEmail: 'olusegun.obasanjo@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'warning', source: 'beta', status: 'failure', createdAt: new Date(now - 10*h), details: { reason: 'Account inactive' } },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[7]), userName: 'Tendai Moyo', userEmail: 'tendai.moyo@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 12*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[7]), userName: 'Tendai Moyo', userEmail: 'tendai.moyo@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 12*h + 3500) },
+      { action: 'auth.token_refresh', entityType: 'auth', userId: String(ids[1]), userName: 'Fatima Hassan', userEmail: 'fatima.hassan@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 14*h) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[8]), userName: 'Aminata Diallo', userEmail: 'aminata.diallo@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 16*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[8]), userName: 'Aminata Diallo', userEmail: 'aminata.diallo@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 16*h + 4000) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 20*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 20*h + 3000) },
+      // 2-7 days ago
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 26*h) },
+      { action: 'auth.mfa_verified', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 26*h + 3000) },
+      { action: 'auth.mfa_enabled', entityType: 'auth', userId: String(ids[5]), userName: 'Grace Akello', userEmail: 'grace.akello@afdb.org', ipAddress: ips[5], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 30*h) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[1]), userName: 'Fatima Hassan', userEmail: 'fatima.hassan@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 48*h) },
+      { action: 'auth.password_changed', entityType: 'auth', userId: String(ids[2]), userName: 'Kwame Asante', userEmail: 'kwame.asante@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 52*h) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[3]), userName: 'Lina Benali', userEmail: 'lina.benali@afdb.org', ipAddress: ips[3], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 72*h) },
+      { action: 'auth.login_failed', entityType: 'auth', userId: String(ids[9]), userName: 'Olusegun Obasanjo', userEmail: 'olusegun.obasanjo@afdb.org', ipAddress: ips[1], userAgent: ua, severity: 'warning', source: 'beta', status: 'failure', createdAt: new Date(now - 80*h), details: { reason: 'Expired credentials' } },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[4]), userName: 'Jean-Pierre Mbuyi', userEmail: 'jp.mbuyi@afdb.org', ipAddress: ips[4], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 96*h) },
+      { action: 'auth.sso_login', entityType: 'auth', userId: String(ids[6]), userName: 'Yasmine Ben Salah', userEmail: 'yasmine.bensalah@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 100*h) },
+      { action: 'auth.login', entityType: 'auth', userId: String(ids[7]), userName: 'Tendai Moyo', userEmail: 'tendai.moyo@afdb.org', ipAddress: ips[2], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 120*h) },
+      { action: 'auth.backup_codes_regenerated', entityType: 'auth', userId: String(ids[0]), userName: 'Amara Diallo', userEmail: 'amara.diallo@afdb.org', ipAddress: ips[0], userAgent: ua, severity: 'info', source: 'beta', status: 'success', createdAt: new Date(now - 130*h) },
+    ];
+
+    const actResult = await actCol.insertMany(activityEvents);
+    console.log(`Seeded ${actResult.insertedCount} activity events successfully\n`);
+
     // ── Display summary ──
     console.log('📋 Project Summary:');
     console.log('─'.repeat(60));
@@ -504,6 +558,18 @@ async function seed() {
     }, {});
     Object.entries(byRole).forEach(([role, count]) => {
       console.log(`   ${role}: ${count}`);
+    });
+    console.log('─'.repeat(60));
+    console.log('');
+
+    console.log('📋 Activity Events Summary:');
+    console.log('─'.repeat(60));
+    const byAction = activityEvents.reduce((acc: Record<string, number>, a) => {
+      acc[a.action] = (acc[a.action] || 0) + 1;
+      return acc;
+    }, {});
+    Object.entries(byAction).forEach(([action, count]) => {
+      console.log(`   ${action}: ${count}`);
     });
     console.log('─'.repeat(60));
     console.log('');
